@@ -1,9 +1,3 @@
-async function getCurrentTab() {
-  let queryOptions = { active: true, lastFocusedWindow: true };
-  let [tab] = await chrome.tabs.query(queryOptions);
-  return tab;
-}
-
 function setPlaybackRate(playbackRate) {
   document
     .querySelectorAll("video")
@@ -21,9 +15,8 @@ function getPlaybackRate() {
   return +playbackRate;
 }
 
-async function onClick() {
-  let tab = await getCurrentTab();
-  await chrome.scripting
+function onClick(tab) {
+  chrome.scripting
     .executeScript({
       target: { tabId: tab.id },
       func: getPlaybackRate,
@@ -39,12 +32,12 @@ async function onClick() {
     });
 }
 
-chrome.action.onClicked.addListener(async function () {
-  onClick();
+chrome.action.onClicked.addListener(function (tab) {
+  onClick(tab);
 });
 
-chrome.commands.onCommand.addListener(function (command) {
+chrome.commands.onCommand.addListener(function (command, tab) {
   if (command === "set_playback_rate") {
-    onClick();
+    onClick(tab);
   }
 });
